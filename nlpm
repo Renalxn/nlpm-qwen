@@ -1,0 +1,79 @@
+#!/bin/bash
+# nlpm: nlpm-qwen 统一入口脚本
+# 用法: nlpm <command> [project_path]
+#
+# 命令:
+#   ls       - 发现并列出所有 NL 工件
+#   score    - 对工件进行 100 分制质量评分
+#   check    - 跨组件一致性检查
+#   fix      - 自动修复确定性问题
+#   trend    - 跟踪质量评分趋势
+#   init     - 初始化项目 NLPM 配置
+#   security - 安全扫描
+
+SCRIPT_DIR="$HOME/.qwen/nlpm-qwen/scripts"
+
+show_help() {
+    cat << EOF
+nlpm-qwen - 自然语言编程管理器（Qwen 版）
+
+用法: nlpm <command> [project_path]
+
+命令:
+  ls       - 发现并列出所有 NL 工件
+  score    - 对工件进行 100 分制质量评分
+  check    - 跨组件一致性检查
+  fix      - 自动修复确定性问题（加 --dry-run 预览）
+  trend    - 跟踪质量评分趋势
+  init     - 初始化项目 NLPM 配置
+  security - 安全扫描
+
+示例:
+  nlpm ls                          # 列出当前目录的工件
+  nlpm score ~/projects/my-project # 评分指定项目
+  nlpm fix . --dry-run             # 预览修复（不实际修改）
+  nlpm trend ~/projects/my-project # 查看评分趋势
+
+EOF
+}
+
+if [ $# -lt 1 ]; then
+    show_help
+    exit 1
+fi
+
+COMMAND="$1"
+PROJECT_PATH="${2:-.}"
+
+case "$COMMAND" in
+    ls)
+        python3 "$SCRIPT_DIR/nlpm-ls.py" "$PROJECT_PATH"
+        ;;
+    score)
+        python3 "$SCRIPT_DIR/nlpm-score.py" "$PROJECT_PATH"
+        ;;
+    check)
+        python3 "$SCRIPT_DIR/nlpm-check.py" "$PROJECT_PATH"
+        ;;
+    fix)
+        python3 "$SCRIPT_DIR/nlpm-fix.py" "$PROJECT_PATH" "${@:3}"
+        ;;
+    trend)
+        python3 "$SCRIPT_DIR/nlpm-trend.py" "$PROJECT_PATH"
+        ;;
+    init)
+        python3 "$SCRIPT_DIR/nlpm-init.py" "$PROJECT_PATH"
+        ;;
+    security)
+        python3 "$SCRIPT_DIR/nlpm-security.py" "$PROJECT_PATH"
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo "错误: 未知命令 '$COMMAND'"
+        echo
+        show_help
+        exit 1
+        ;;
+esac
